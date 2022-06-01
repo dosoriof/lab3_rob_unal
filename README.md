@@ -5,8 +5,9 @@
 
 ## Inverse Kinematics
 
-### Workspace
 
+### Workspace
+![Grafica Espacio de Trabajo](DynaPhantom-Layout1.eps)
 ## Pick and Place
 
 ## Movement in task space
