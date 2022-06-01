@@ -4,8 +4,11 @@
 
 
 ## Inverse Kinematics
-![Grafica Espacio de Trabajo](DynaPhantom-Layout2.jpg)
-A partir de la gráfica anterior podemos deducir las siguientes relaciones
+
+<img src="DynaPhantom-Layout2.jpg" alt="Gráfica Cinemática inversa" width="500">
+
+A partir de la gráfica anterior podemos deducir las siguientes relaciones:
+
 $$ T_T = \begin{bmatrix} n_x & o_x & a_x & x_T \newline n_y & o_y & a_y & y_T \newline n_z & o_z & a_z & z_T \newline 0 & 0 & 0 & 1 \end{bmatrix}$$
 $$ r = \sqrt{x_T^2 + y_T^2} $$
 $$ h = z_w - l_1 $$
@@ -38,7 +41,10 @@ $$ pitch = atan2(R_{p31},R_{p11}) $$
 $$ q_4 = pitch - q_2 - q_3 $$
 
 ### Workspace
-![Grafica Espacio de Trabajo](DynaPhantom-Layout1.jpg)
+<img src="DynaPhantom-Layout1.jpg" alt="Gráfica Espacio de trabajo" width="700">
+
+
+
 ## Pick and Place
 
 ## Movement in task space
