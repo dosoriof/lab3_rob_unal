@@ -1,2 +1,13 @@
-# lab3_rob_unal
-Laboratory 3 - Robotics - Universidad Nacional de Colombia
+# Laboratory 3 - Inverse Kinematics - Phantom X - ROS
+* Rafael Ricardo Galindo Leon
+* Diego Fabian Osorio Fonseca
+
+
+## Inverse Kinematics
+
+### Workspace
+
+## Pick and Place
+
+## Movement in task space
+
