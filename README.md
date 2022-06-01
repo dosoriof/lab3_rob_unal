@@ -31,8 +31,11 @@ $$ q_3 = \theta_3 $$
 Nota: Para cambiar los valores de las articulaciones de q_2 y q_3 para las cofiguraciones de codo arriba o codo abajo únicamente hay que cambiar a theta3 de signo
 
 **q4**
+$$ R_{pitch} = \begin{bmatrix} cos(q_1) & sin(q_1) & 0 \newline -sin(q_1) & cos(q_1) & 0 \newline 0 & 0 & 1 \end{bmatrix}  R_T$$
 
+$$ pitch = atan2(R_{p31},R_{p11}) $$
 
+$$ q_4 = pitch - q_2 - q_3 $$
 
 ### Workspace
 ![Grafica Espacio de Trabajo](DynaPhantom-Layout1.jpg)
