@@ -45,8 +45,8 @@ def getkey():
         termios.tcsetattr(fd, TERMIOS.TCSAFLUSH, old)
     return c
 
-## This function prints the number and name of the joint is 
-## currently on focus and being controlled.
+## This function prints the name of 
+## the action that will be executed
 def printMov(numMov):
     if numMov == 1:
         print("trax")
@@ -57,15 +57,24 @@ def printMov(numMov):
     elif numMov == 4:
         print("rot")
 
+## This function configures the maximum speed in all the joints
+## to ensure the motors will not move to fast and prevent 
+## collisions or accidents.
 def setMovingSpeed(speed):
     for i in range(4):
         jointCommand('',i+1, 'Moving_Speed',speed, 0)   #Cambiar si cambian ID de motores
 
+## This function executes the movement of all joints given 
+## the value of all joint objective positions.
 def moveLinks(links):
     links_b = round((links-(-5*np.pi/6))*(1023/(5*np.pi/3)))
     for i in range(4):
         jointCommand('',i+1, 'Goal_Position',links_b[i], 0)   #Cambiar si cambian ID de motores
 
+## This function returns the solution for each joint,
+## given a transformation matrix, and the desired
+## elbow solution, 'down' or 'up'; uses the geometric 
+## method and decouple.
 def invKinPhantomX(T, elbow):
     l = np.array([14.5, 10.25, 10.25, 9]) # Longitudes eslabones
     
@@ -116,6 +125,9 @@ def invKinPhantomX(T, elbow):
     q_inv = np.array([q1, q2, q3, q4])
     return q_inv 
 
+## This function calculates que requested action in the keyboard, 
+## given the values of the action, actual position and direction, 
+## return the MTH of the desired position.
 def changeT(numMov, T_actual, direction):
     X, Y, Z = transl(T_actual)
     aZ1, aY, aZ2 = tr2eul(T_actual) #verificar que las funciones del toolbox se usen igual en python
@@ -141,6 +153,8 @@ def changeT(numMov, T_actual, direction):
     print(b)
     return T_actual
 
+## This function evaluates if the desires position is 
+## achievable and within the max and min values for each joint.
 def checkJointsValues(q):
     max = np.deg2rad(150)
     min = np.deg2rad(-150)
@@ -193,37 +207,37 @@ if __name__ == '__main__':
     print(checkJointsValues(q_act))
     T_act = changeT(nMov, T_act, 1)
     print(T_act)
-    # try:
-    #     setMovingSpeed(200)
-    #     # Posicion inicial 
-    #     moveLinks(q_act)
-    #     printMov(nMov)
-    #     while 1:
-    #         key = getkey()
-    #         if key == b'w':
-    #             a = nMov+1
-    #             if (a > 4):
-    #                 nMov = 1
-    #             else:
-    #                 nMov = nMov+1
-    #             printMov(nMov)
-    #         if key == b's':
-    #             a = nMov-1
-    #             if (a < 1):
-    #                 nMov = 4
-    #             else:
-    #                 nMov = nMov-1
-    #             printMov(nMov)
-    #         if key == b'a':
-    #             T_act = changeT(nMov, T_act, -1)
-    #             q_act = invKinPhantomX(T_act, 'up')
-    #             if checkJointsValues(q_act):
-    #                 moveLinks(q_act)
-    #         if key == b'd':
-    #             T_act = changeT(nMov, T_act, 1)
-    #             q_act = invKinPhantomX(T_act, 'up')
-    #             if checkJointsValues(q_act):
-    #                 moveLinks(q_act)
+    try:
+        setMovingSpeed(200)
+        # Posicion inicial 
+        moveLinks(q_act)
+        printMov(nMov)
+        while 1:
+            key = getkey()
+            if key == b'w':
+                a = nMov+1
+                if (a > 4):
+                    nMov = 1
+                else:
+                    nMov = nMov+1
+                 printMov(nMov)
+            if key == b's':
+                a = nMov-1
+                if (a < 1):
+                    nMov = 4
+                else:
+                    nMov = nMov-1
+                printMov(nMov)
+             if key == b'a':
+                T_act = changeT(nMov, T_act, -1)
+                q_act = invKinPhantomX(T_act, 'up')
+                if checkJointsValues(q_act):
+                    moveLinks(q_act)
+             if key == b'd':
+                 T_act = changeT(nMov, T_act, 1)
+                q_act = invKinPhantomX(T_act, 'up')
+                if checkJointsValues(q_act):
+                    moveLinks(q_act)
         
-    # except rospy.ROSInterruptException:
-    #     pass
+    except rospy.ROSInterruptException:
+        pass
