@@ -4,7 +4,7 @@
 
 
 ## Inverse Kinematics
-
+![Grafica Espacio de Trabajo](Dyna.svg)
 
 ### Workspace
 ![Grafica Espacio de Trabajo](Dyna.svg)
