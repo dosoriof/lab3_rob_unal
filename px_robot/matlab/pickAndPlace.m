@@ -1,17 +1,23 @@
 %% Posiciones 
-d = 15;
-h = 5;
-TRa = transl(0,-d,10)*trotz(-pi/2)*troty(-pi);
-TRb = transl(0,-d,h)*trotz(-pi/2)*troty(-pi);
+%% Se calcula las posiciones de los vértices de la ruta que debe realizar el robot.
 
-TLa = transl(0,d,10)*trotz(pi/2)*troty(-pi);
-TLb = transl(0,d,h)*trotz(pi/2)*troty(-pi);
+d = 15; % Radio de los puntos de acenso y descenso
+h = 5; % Desfase en altura entre el desplazamiento y el agarre de la pieza
+TRa = transl(0,-d,10)*trotz(-pi/2)*troty(-pi); % Matriz de translacion Derecha Arriba
+TRb = transl(0,-d,h)*trotz(-pi/2)*troty(-pi); % Matriz de translacion Derecha Abajo
 
-TCa = transl(d,0,10)*troty(-pi);
-TCb = transl(d,0,h)*troty(-pi);
+TLa = transl(0,d,10)*trotz(pi/2)*troty(-pi); % Matriz de translacion Izquierda Arriba
+TLb = transl(0,d,h)*trotz(pi/2)*troty(-pi); % Matriz de translacion Izquierda Abajo
+
+TCa = transl(d,0,10)*troty(-pi);  % Matriz de translacion Centro Arriba
+TCb = transl(d,0,h)*troty(-pi);  % Matriz de translacion Centro Abajo
+
+
 %% Robot plot
+%% Se definen los parámetros geométricos del robot.
 l = [14.5, 10.25, 10.25, 9]; % Links lenght
 % Robot Definition RTB
+%% Se construye el modelo geométrico del robot en el toolbox del Peter Corke
 L(1) = Link('revolute','alpha',pi/2,'a',0,   'd',l(1),'offset',0,   'qlim',[-3*pi/4 3*pi/4]);
 L(2) = Link('revolute','alpha',0,   'a',l(2),'d',0,   'offset',pi/2,'qlim',[-3*pi/4 3*pi/4]);
 L(3) = Link('revolute','alpha',0,   'a',l(3),'d',0,   'offset',0,   'qlim',[-3*pi/4 3*pi/4]);
@@ -19,23 +25,17 @@ L(4) = Link('revolute','alpha',0,   'a',0,   'd',0,   'offset',0,   'qlim',[-3*p
 PhantomX = SerialLink(L,'name','Px');
 PhantomX.tool = [0 0 1 l(4); -1 0 0 0; 0 -1 0 0; 0 0 0 1];
 % Plotting
-q = [0  0 0 0];
-% q = invKinPhantomX(TRa,'up');
+q = [0  0 0 0]; %% Home
 q_rad = deg2rad(q);
 PhantomX.plot(q_rad,'notiles','noname');
 hold on
 ws = [-50 50];
 trplot(eye(4),'rgb','arrow','length',15,'frame','0')
 axis([repmat(ws,1,2) 0 60])
-% Frames
-% M = eye(4);
-% for i=1:PhantomX.n
-%     M = M * L(i).A(q_rad(i));
-%     trplot(M,'rgb','arrow','frame',num2str(i),'length',12)
-% end
 
 %% Trayectorias 
-
+%% Se calcula la cinemática inversa del robot para cada una de 
+%% las posiciones de translación de vértices anteriormente calculadas.
 % pos inicial - centro
 P1 = invKinPhantomX(TCa,'up');
 % pos derecha arriba
@@ -49,24 +49,29 @@ P5 = invKinPhantomX(TLb,'up');
 % pos centro abajo
 P6 = invKinPhantomX(TCb,'up');
 
-% Trayectorias
-n = 30;
-n2 = 15;
-TC_R = ctraj(TCa,TRa,n);
-TR_C = ctraj(TRa,TCa,n);
-TC_L = ctraj(TCa,TLa,n);
-TL_C = ctraj(TLa,TCa,n);
-TC_a = ctraj(TCb,TCa,n2);
-TC_b = ctraj(TCa,TCb,n2);
-TR_a = ctraj(TRb,TRa,n2);
-TR_b = ctraj(TRa,TRb,n2);
-TL_a = ctraj(TLb,TLa,n2);
-TL_b = ctraj(TLa,TLb,n2);
+% Rutas
+%% Se Calcula la interpolación entre vértices para hacer una ruta más suave.
+%% Se usa un numero de interpolaciones para las rutas 
+%% horizontales y otro para las rutas verticasles.
+n = 30; % Numero de interpolaciones de ruta Horizontal.
+n2 = 15; % Numero de interpolaciones de ruta Vertical
+TC_R = ctraj(TCa,TRa,n); % Ruta Centro Arriba -- Derecha Arriba
+TR_C = ctraj(TRa,TCa,n); % Ruta Derecha Arriba -- Centro Arriba
+TC_L = ctraj(TCa,TLa,n); % Ruta Centro Arriba -- Izquierda Arriba
+TL_C = ctraj(TLa,TCa,n); % Ruta Izquierda Arriba -- Centro Arriba
+TC_a = ctraj(TCb,TCa,n2);  % Ruta Centro Abajo -- Centro Arriba
+TC_b = ctraj(TCa,TCb,n2);  % Ruta Centro Arriba -- Centro Abajo
+TR_a = ctraj(TRb,TRa,n2);  % Ruta Derecha Abajo -- Derecha Arriba
+TR_b = ctraj(TRa,TRb,n2);  % Ruta Derecha Arriba -- Derecha Abajo
+TL_a = ctraj(TLb,TLa,n2);  % Ruta Izquierda Abajo -- Izquierda Arriba
+TL_b = ctraj(TLa,TLb,n2);  % Ruta Izquierda Arriba -- Izquierda Abajo
 
-%% Matriz completa de posiciones
-
+%% Valores para las posisiones del gripper
 open = 0;
 close = 0.8624;%mapfun(680,0,1023,deg2rad(-150),deg2rad(150))
+
+%% Calculo de la ruta completa, teniendo en cuenta los 
+%% vértices y los puntos de interpolación.
 
 %home
 q_home = [0 0 0 0 open];
@@ -144,7 +149,7 @@ end
 
 %Centro arriba 2
 
-%Matriz total de valores articulares
+%Matriz total de valores articulares de la ruta completa.
 
 qTotal = [q_home;
           qC_a;
@@ -176,7 +181,12 @@ rosinit
 %%
 motorSvcClient = rossvcclient('dynamixel_workbench/dynamixel_command');%creacion del cliente
 motorCommandMsg = rosmessage(motorSvcClient);%creacion del mensaje
-%% 
+
+%% Configuracion de la velocidad maxima para todas 
+%% las articulaciones, para garantizar que los motores 
+%% no se mueven a altas velocidades, con esto se evita 
+%% reducierles el torque a los motores y se tiene tiempo
+%% para prevenir choques del robot.
 motorCommandMsg.AddrName = "Moving_Speed";
 motorCommandMsg.Value = 100;
 motorCommandMsg.Id = 1;
@@ -190,8 +200,11 @@ call(motorSvcClient,motorCommandMsg);
 motorCommandMsg.Id = 5;
 call(motorSvcClient,motorCommandMsg);
 
-%%
-pause(10)
+%% Se ejecutan los movientes de todas las articulaciones
+%% para cumplir con la ruta planeada, al usar la 
+%% función Goal_Position se presenta el inconveniente
+%% de que el robot no ejecuta la siguiente acción hasta 
+%% que se haya completado la primera.
 motorCommandMsg.AddrName = "Goal_Position";
 for j=1:length(qTotal)
     for i=1:5
@@ -212,24 +225,24 @@ for j=1:length(qTotal)
 end
 
 %% Move with keyboard
-X = 10;
-Y = 10;
+%% Función para mover el robot en pasos predeterminados
+%% con el teclado, se mueve en los ejes X, Y, Z y se rota
+%% el ángulo de ataque respecto a la Horizontal
+X = 15;
+Y = 0;
 Z = 10;
+%% Se determina la cinemática inversa de la posición inicial.
 T_ini = transl(X,Y,Z)*trotz(atan2(Y,X))*troty(-pi);
 Pini = invKinPhantomX(T_ini, 'up')
 PhantomX.plot(Pini,'notiles','noname')
 T_act = T_ini;
-angles = tr2eul(T_act);
-aZ1 = angles(1)
-aY = angles(2)
-aZ2 = angles(3)
 for i=1:5
-    [X, Y, Z] = transl(T_act);
-    angles = tr2eul(T_act);
+    [X, Y, Z] = transl(T_act); % Posición cartesiana actual.
+    angles = tr2eul(T_act); % Angulos de Euler actuales.
     aZ1 = angles(1)
     aY = angles(2)
     aZ2 = angles(3)
-    d_tra = 1; 
+    d_tra = 1; % Paso de translacion
     d_rot = 5*pi/180;
     aY = aY + -1*d_rot;
     Y = Y + -1*d_tra;
