@@ -7,7 +7,7 @@
 
 
 ### Workspace
-![Grafica Espacio de Trabajo](DynaPhantom-Layout1.eps)
+![Grafica Espacio de Trabajo](Dyna.svg)
 ## Pick and Place
 
 ## Movement in task space
