@@ -399,3 +399,7 @@ El cambio de movimiento se hace al oprimir las teclas W y S del teclado, con est
 [Laboratorio 3 Robótica - Pick and Place, Movimiento en el espacio de la tarea](https://youtu.be/Qm2VoXwQtFI)
 
 ## Conclusiones
+
+* La cinemática inversa es de las partes más importantes en el uso práctico de Robots porque finalmente es esta con la que podremos mover el robot en la manera que nosotros deseamos, ya que en cualquier aplicación que construyamos, siempre vamos a conocer son los valores en posición y orientación a lo que queremos que nuestro Robot llegue, y a partir de estos tenemos que calcular los valores articulares a los que tenemos que comandar cada actuador (motor).
+* Con este nuevo laboratorio empezamos a ver que con las herramientos utilizadas (ROS, Python, Matlab) se pueden empezar a desarrollar aplicaciones útiles en el ámbito industrial, como lo es el Pick and Place
+* Para un mejor desarrollo del laboratorio en cuanto a la suavidad de los movimientos sería necesario implementar un nuevo servicio que permita comandar todos los motores al mismo tiempo. Como vimos, esto si se puede hacer, pero no se encuentra dentro de los servicios de los paquetes de ROS que tenemos
