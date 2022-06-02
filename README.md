@@ -41,7 +41,7 @@ $$ pitch = atan2(R_{p31},R_{p11}) $$
 $$ q_4 = pitch - q_2 - q_3 $$
 
 ### Workspace
-<img src="DynaPhantom-Layout11.jpg" alt="Gráfica Espacio de trabajo" width="700">
+<img src="DynaPhantom-Layout.jpg" alt="Gráfica Espacio de trabajo" width="700">
 
 
 
