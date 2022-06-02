@@ -309,7 +309,86 @@ end
 
 ## Movement in task space
 
+Para realizar la segunda parte de este laboratorio se decidió trabajar en un Script en Python. Este Script tiene el nombre de ***keyboardMove.py*** que se encuentra en la carpeta px_robot/scripts. Dentro de este Script se encuentra también la función de cinemática inversa implementada en Matlab.
 
+Para realizar este ejercicio se creó una función principal que es la que realiza la modificación de la matriz de transformación del TCP de la herramienta. Esta función: ***changeT*** recibe 3 argumentos. Primero *numMov*, que corresponde al tipo de movimiento que se quiere realizar: de 1 a 3 para traslación en x, y, z respectivamente y 4 para rotación sobre el eje O del TCP. Luego, *T_actual* que es la matriz actual que se quiere modificar y finalmente *direction* que es 1 si se quiere la dirección positiva o -1 si se quiere negativa. 
+
+Lo primero que se hace dentro de esta funció es obtener el Pose del TCP en coordenadas x,y,z y en ángulos de euler. Eso se hace con las funciones del toolbox de Peter Corke. Estas posiciones y orientaciones se empiezan a modificar dependiendo del tipo de movimiento. Por ejemplo, si se quiere un "traY" es necesario sumarle un valor a la posición Y, y adempas modificar uno de los ángulos de Euler que cambia al cambiar esta posición. Posteriormente se calcula una nueva matriz de transformación con los nuevos valores que han sido modificados y esta es la que se retorna. 
+
+``` python
+def changeT(numMov, T_actual, direction):
+    X, Y, Z = transl(T_actual)
+    aZ1, aY, aZ2 = tr2eul(T_actual) #verificar que las funciones del toolbox se usen igual en python
+    print(aZ2)
+    d_tra = 1
+    d_rot = 2*np.pi/180
+
+    if numMov == 1:
+        X = X + direction*d_tra
+        aZ2 = -np.arctan2(Y,X)
+    if numMov == 2:
+        Y = Y + direction*d_tra
+        aZ2 = -np.arctan2(Y,X)
+    if numMov == 3:
+        Z = Z + direction*d_tra
+    if numMov == 4:
+        aY = aY + direction*d_rot
+    b = np.array([[X], [Y], [Z]])
+    T_actual = rt2tr(eul2r(aZ1,aY,aZ2),b)
+    return T_actual
+
+```
+
+Otras funciones importantes que se utilizaron son:
+
+* ***setMovingSpeed*** para cambiar las velocidades de movimiento de los motores a una velocidad *speed* en bits
+
+``` python
+def setMovingSpeed(speed):
+    for i in range(4):
+        jointCommand('',i+1, 'Moving_Speed',speed, 0)   #Cambiar si cambian ID de motores
+```
+
+* ***moveLinks*** para comandar cada uno de los motores a la posición de la articulación deseada. La entrada es el vector *q* de valores articulares en radianes
+
+``` python
+def moveLinks(links):
+    for i in range(4):
+        jointCommand('',i+1, 'Goal_Position',round((links[i]-(-5*np.pi/6))*(1023/(5*np.pi/3))), 0)   #Cambiar si cambian ID de motores
+```
+
+* ***checkJointsValues*** para verificar que los valores de *q* se encuentren dentro de los límites del robot
+
+``` python
+def checkJointsValues(q):
+    max = np.deg2rad(150)
+    min = np.deg2rad(-150)
+    if q[0]<max and q[0]>min:
+        q1 = True
+    else:
+        q1 = False
+        print("q1 value out of Limits")
+    
+    if q[1]<max and q[1]>min:
+        q2 = True
+    else:
+        q2 = False
+        print("q2 value out of Limits")
+
+    if q[2]<max and q[2]>min:
+        q3 = True
+    else:
+        q3 = False
+        print("q3 value out of Limits")
+    
+    if q[3]<max and q[3]>min:
+        q4 = True
+    else:
+        q4 = False
+        print("q4 value out of Limits")
+    
+    return q1 and q2 and q3 and q4
+```
 
 ## Resultados
 
