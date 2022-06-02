@@ -58,9 +58,9 @@ Adicionalmente es importante considerar que para el presente ejercicio se toma c
 
 ## Pick and Place
 
-El código para la parte de pick and place se basa principalmente en reconocer los vértices de la ruta que debe realizar el efector final y generar con dicha pose las rutas interpolando entre dichos puntos, al tener las poses para todos los puntos por los que se debe desplazar al efector final se realiza el cálculo para cada uno de ellos de las matrices de transformación homogénea MTH, luego se realiza el cálculo de la cinemática inversa, para todos los casos se usa la solución codo arriba.
+El código para la parte de pick and place se basa principalmente en reconocer los vértices de la ruta que debe realizar el efector final y generar con dicha pose las rutas interpolando entre dichos puntos, al tener las poses para todos los puntos por los que se debe desplazar al efector final se realiza el cálculo para cada uno de ellos de las matrices de transformación homogénea MTH, luego se realiza el cálculo de la cinemática inversa, para todos los casos se usa la solución codo arriba. 
 
-De forma detallada el código es como sigue:
+Para hacer esta implementación se usó Matlab. De forma detallada el código es como sigue:
 ### Cálculo de los vértices de la trayectoria.
 En esta parte se determinan las coordenadas en las cueles se van a colocar las piezas que deben moverse para realizar el proceso de ensamblaje, en esta parte se procura que estas coordenadas estén en una zona central del espacio del trabajo, y que el ángulo de ataque del efector final sea vertical para minimizar los cálculos de la cinemática inversa.
 ``` matlab
