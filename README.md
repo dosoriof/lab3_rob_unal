@@ -40,6 +40,8 @@ $$ pitch = atan2(R_{p31},R_{p11}) $$
 
 $$ q_4 = pitch - q_2 - q_3 $$
 
+Se realizó la implementación de esta cinemática inversa en una función de Matlab que se puede ver en el directorio px_robot/matlab/invKinPhantomX.m
+
 ### Workspace
 Para determina  el espacio de trabajo del motor se realiza un diagrama geométrico simplificado del mismo con los datos medidos del robot físico, se determina el espacio de trabajo del motor en el plano XZ del origen, considerando que es el plano que más variaciones tiene, especialmente si se considera que el plano XY es un circulo competo debido a la acción rotacional del primer actuador, y el espacio de trabajo en el plano YZ es muy similar al plano de trabajo en el Plano XZ solo que con menos restricciones por interferencia.
 
