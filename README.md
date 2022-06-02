@@ -225,6 +225,75 @@ qTotal = [q_home;
           qC_b;
           qC_a2];
 ```
+### Inicialización del servicio en ROS
+Teniendo calculados todos los puntos de la ruta con su cinemática inversa, se procede a inicializar el proceso para realizar el control del robot.
+
+``` matlab
+%% ROS Connection 
+rosinit
+%%
+motorSvcClient = rossvcclient('dynamixel_workbench/dynamixel_command');%creacion del cliente
+motorCommandMsg = rosmessage(motorSvcClient);%creacion del mensaje
+```
+### Configuración de la velocidad máxima.
+Se realiza una configuración de los motores AX12 del Phantom, esta configuración se hace al verificar la existencia de la función en el manual del Dynamixel, esta función presenta beneficios comparada con la que se usa en casos anteriores de Torque_Limit, principalmente porque en algunas trayectorias el torque necesarios puede ser mayor al establecido, lo cual arria que los motores entren error debido a que no pueden llegar a la posición deseada, cosa que no pasa definiendo como limite la velocidad, debido a que en este caso los motores pueden usar todo el torque posible, adicionalmente es mejor controlar la velocidad debido a que esto hace que la operación de los motores sea menos acelerada y se esfuercen mucho menos mecánicamente y eléctricamente, además de dar un tiempo de respuesta mayor en caso de que puedan presentarse choques, ya sea con algún elemento o persona, haciendo tono el sistema mas seguro.
+La informacion detallada de como funciona dicha funcion se peude encontrar en el siguente link: https://emanual.robotis.com/docs/en/dxl/ax/ax-12w/#moving-speed La forma de definirlo es como se puede ver en la siguiente imagen:
+<img src="DynaSpeed.jpg" alt="Manual Moving_Speed" width="700">
+
+``` matlab
+%% Configuracion de la velocidad maxima para todas 
+%% las articulaciones, para garantizar que los motores 
+%% no se mueven a altas velocidades, con esto se evita 
+%% reducierles el torque a los motores y se tiene tiempo
+%% para prevenir choques del robot.
+motorCommandMsg.AddrName = "Moving_Speed";
+motorCommandMsg.Value = 100;
+motorCommandMsg.Id = 1;
+call(motorSvcClient,motorCommandMsg);
+motorCommandMsg.Id = 2;
+call(motorSvcClient,motorCommandMsg);
+motorCommandMsg.Id = 3;
+call(motorSvcClient,motorCommandMsg);
+motorCommandMsg.Id = 4;
+call(motorSvcClient,motorCommandMsg);
+motorCommandMsg.Id = 5;
+call(motorSvcClient,motorCommandMsg);
+```
+### Ejecución de los movimientos.
+Como se puede ver a continuación, para realizar la ejecución de los movimientos se usa una función iterativa que toma cada uno de los valores objetivo y se los asigna al motor indicado, de esta forma se realiza el movimiento, en este caso y en la operación se puede evidenciar que los movimientos se realizan de forma consecutiva, esto genera que los movimientos en los que deben actuar más de un motor se vean como un proceso escalonado, impulsivo y errático, esto se debe a que al enviar el comando de movimiento a un motor este debe responder si pudo ejecutar el movimiento, lo cual obliga a esperar hasta que dicho movimiento sea ejecutado, impidiendo así realizar movimientos simultáneos.
+El protocolo 1.0 de Dynamixel considera una solución a esto con la función Sync Write como se muestra en la siguiente imagen:
+<img src="DynaSync.jpg" alt="Manual Sync Write" width="700">
+
+Esta función se encuentra en https://emanual.robotis.com/docs/en/dxl/protocol1/#instruction-details y con ella se puede realizar un comando simultaneo a varios motores con las funciones de Goal Position y Moving Speed, estas dos funciones pueden permitir realizar un movimiento mucho más suave y acercado a la ruta deseada dado que al poder determinar la velocidad y la posición objetivo para cada motor y que la acción se ejecute de forma simultanea se puede obtener un movimiento muy cercano al rectilíneo, siempre y cuando los puntos inicial y final no estén muy distantes ente si, adicionalmente esto permite que el robot no se vea esforzado por las constantes aceleraciones y desaceleraciones dado que el siguiente movimiento a ejecutarse será más colineal con el anterior, cosa que no pasa con el comando Goal Position dado que un motor realiza su desplazamiento y debe detenerse completamente para permitir que el otro motor actúe, adicionalmente el bus de comunicación se verá mucho menos utilizado dado que así se le envían comandos simultáneos a todos los motores y no debe realizarse un comando a cada motor y espera su respuesta.
+
+
+``` matlab
+%% Se ejecutan los movientes de todas las articulaciones
+%% para cumplir con la ruta planeada, al usar la 
+%% función Goal_Position se presenta el inconveniente
+%% de que el robot no ejecuta la siguiente acción hasta 
+%% que se haya completado la primera.
+motorCommandMsg.AddrName = "Goal_Position";
+for j=1:length(qTotal)
+    for i=1:5
+        if j~=1
+           if qTotal(j,i)~=qTotal(j-1,i)
+               motorCommandMsg.Id = i;
+               motorCommandMsg.Value = round(mapfun(qTotal(j,i),deg2rad(-150),deg2rad(150),0,1023));
+               call(motorSvcClient,motorCommandMsg);
+           end
+        else
+            motorCommandMsg.Id = i;
+            motorCommandMsg.Value = round(mapfun(qTotal(j,i),deg2rad(-150),deg2rad(150),0,1023));
+            call(motorSvcClient,motorCommandMsg);
+        end
+        
+    end
+end
+```
+
+
+
 
 ## Movement in task space
 
