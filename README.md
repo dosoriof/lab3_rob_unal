@@ -303,7 +303,10 @@ for j=1:length(qTotal)
     end
 end
 ```
+## Resultados
 
+### Video
+[Laboratorio 3 Robótica - Pick and Place, Movimiento en el espacio de la tarea](https://youtu.be/Qm2VoXwQtFI)
 
 
 
