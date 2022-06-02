@@ -266,6 +266,7 @@ El protocolo 1.0 de Dynamixel considera una solución a esto con la función Syn
 
 Esta función se encuentra en https://emanual.robotis.com/docs/en/dxl/protocol1/#instruction-details y con ella se puede realizar un comando simultaneo a varios motores con las funciones de Goal Position y Moving Speed, estas dos funciones pueden permitir realizar un movimiento mucho más suave y acercado a la ruta deseada dado que al poder determinar la velocidad y la posición objetivo para cada motor y que la acción se ejecute de forma simultanea se puede obtener un movimiento muy cercano al rectilíneo, siempre y cuando los puntos inicial y final no estén muy distantes ente si, adicionalmente esto permite que el robot no se vea esforzado por las constantes aceleraciones y desaceleraciones dado que el siguiente movimiento a ejecutarse será más colineal con el anterior, cosa que no pasa con el comando Goal Position dado que un motor realiza su desplazamiento y debe detenerse completamente para permitir que el otro motor actúe, adicionalmente el bus de comunicación se verá mucho menos utilizado dado que así se le envían comandos simultáneos a todos los motores y no debe realizarse un comando a cada motor y espera su respuesta.
 
+Sin embargo, esta función aún no está implementada en la librería que se usa por tal motivo no se hace uso de la misma.
 
 ``` matlab
 %% Se ejecutan los movientes de todas las articulaciones
