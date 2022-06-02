@@ -5,7 +5,7 @@
 
 ## Inverse Kinematics
 
-<img src="DynaPhantom-Layout2.jpg" alt="Gráfica Cinemática inversa" width="500">
+<img src="DynaPhantom-Layout21.jpg" alt="Gráfica Cinemática inversa" width="500">
 
 A partir de la gráfica anterior podemos deducir las siguientes relaciones:
 
