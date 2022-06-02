@@ -389,6 +389,9 @@ def checkJointsValues(q):
     
     return q1 and q2 and q3 and q4
 ```
+Con estas funciones ya explicadas y definidas se puede realizar el codigo main que realiza los movimientos. Entoces, primero se define una posición inicial del robot en una MTH y con la cinemática inversa se calculan los valores articulares de esta MTH. Antes de mandar el robot a esta pose inicial, hacemos una configuración de la velocidad de movimiento para evitar movimientos fuertes en cada comando de posición de los motores. Cuando esto se ha hecho ya se manda al robot a esta posición inicial. Después de esto, se ejecuta un ciclo infinito en el que se puede ir escogiendo el tipo de movimiento que se quiere hacer y el comando de movimiento en dirección positiva y negativa. 
+
+El cambio de movimiento se hace al oprimir las teclas W y S del teclado, con esto se aumenta o disminuye la variable *nMov* que es la que contiene esta infromación. La ejecución del movimiento positivo y negativo se hace con las teclas D y A, respectivamente. Para ejetutar estos movimientos primero se hace el cambio de la MTH actual con la función ***changeT*** explicada anteriormente, con el tipo de movimiento y dirección escogidas. Luego se calcula la cinemática inversa de esta nueva MTH y finalmente se comanda cada uno de los motores a esta posición articular calculada dependiendo de si estos valores calculados se encuentran dentro de los límites.
 
 ## Resultados
 
