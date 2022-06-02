@@ -47,5 +47,184 @@ $$ q_4 = pitch - q_2 - q_3 $$
 
 ## Pick and Place
 
+El código para la parte de pick and place se basa principalmente en reconocer los vértices de la ruta que debe realizar el efector final y generar con dicha pose las rutas interpolando entre dichos puntos, al tener las poses para todos los puntos por los que se debe desplazar al efector final se realiza el cálculo para cada uno de ellos de las matrices de transformación homogénea MTH, luego se realiza el cálculo de la cinemática inversa, para todos los casos se usa la solución codo arriba.
+
+De forma detallada el código es como sigue:
+### Cálculo de los vértices de la trayectoria.
+En esta parte se determinan las coordenadas en las cueles se van a colocar las piezas que deben moverse para realizar el proceso de ensamblaje, en esta parte se procura que estas coordenadas estén en una zona central del espacio del trabajo, y que el ángulo de ataque del efector final sea vertical para minimizar los cálculos de la cinemática inversa.
+``` matlab
+%% Posiciones 
+%% Se calcula las posiciones de los vértices de la ruta que debe realizar el robot.
+
+d = 15; % Radio de los puntos de acenso y descenso
+h = 5; % Desfase en altura entre el desplazamiento y el agarre de la pieza
+TRa = transl(0,-d,10)*trotz(-pi/2)*troty(-pi); % Matriz de translacion Derecha Arriba
+TRb = transl(0,-d,h)*trotz(-pi/2)*troty(-pi); % Matriz de translacion Derecha Abajo
+
+TLa = transl(0,d,10)*trotz(pi/2)*troty(-pi); % Matriz de translacion Izquierda Arriba
+TLb = transl(0,d,h)*trotz(pi/2)*troty(-pi); % Matriz de translacion Izquierda Abajo
+
+TCa = transl(d,0,10)*troty(-pi);  % Matriz de translacion Centro Arriba
+TCb = transl(d,0,h)*troty(-pi);  % Matriz de translacion Centro Abajo
+```
+ ### Definición de las características geométricas del robot.
+En esta parte se toman las características geométricas reales del robot y se construye con ellas el modelo del robot cumpliendo con el modelo de Denavit and Hartenberg, este modelo es de gran importancia porque nos permite verificar que el modelo con el que se trabaja corresponde con el robot real, de esta forma se puede verificar los comportamientos y sistemas de coordenadas, para evitar que el robot se estrelle o pueda generar un accidente, en caso de que se tengan mal planteados los sistemas.
+
+``` matlab
+%% Robot plot
+%% Se definen los parámetros geométricos del robot.
+l = [14.5, 10.25, 10.25, 9]; % Links lenght
+% Robot Definition RTB
+%% Se construye el modelo geométrico del robot en el toolbox del Peter Corke
+L(1) = Link('revolute','alpha',pi/2,'a',0,   'd',l(1),'offset',0,   'qlim',[-3*pi/4 3*pi/4]);
+L(2) = Link('revolute','alpha',0,   'a',l(2),'d',0,   'offset',pi/2,'qlim',[-3*pi/4 3*pi/4]);
+L(3) = Link('revolute','alpha',0,   'a',l(3),'d',0,   'offset',0,   'qlim',[-3*pi/4 3*pi/4]);
+L(4) = Link('revolute','alpha',0,   'a',0,   'd',0,   'offset',0,   'qlim',[-3*pi/4 3*pi/4]);
+PhantomX = SerialLink(L,'name','Px');
+PhantomX.tool = [0 0 1 l(4); -1 0 0 0; 0 -1 0 0; 0 0 0 1];
+% Plotting
+q = [0  0 0 0]; %% Home
+q_rad = deg2rad(q);
+PhantomX.plot(q_rad,'notiles','noname');
+hold on
+ws = [-50 50];
+trplot(eye(4),'rgb','arrow','length',15,'frame','0')
+axis([repmat(ws,1,2) 0 60])
+```
+### Interpolación entre vértices para las rutas.
+Se realiza el proceso de interpolación ente los vértices que forman parte de la trayectoria, considerando el sentido de desplazamiento y realizando interpolaciones con espaciados diferentes para los movimientos que son horizontales y los movimientos verticales, este valor se usa para que la distancia entre puntos de la interpolación sea aproximadamente la misma, dejándolos un poco más cercanos en las rutas verticales, dado que ese movimiento es más sensible a errores, porque en esos trayectos se interactúa con las piezas y un movimiento brusco puede afectar el desarrollo de la operación. En este caso las rutas que se repiten, como las rutas verticales en el centro, se interpolan solo una vez.
+
+``` matlab
+% Rutas
+%% Se Calcula la interpolación entre vértices para hacer una ruta más suave.
+%% Se usa un numero de interpolaciones para las rutas 
+%% horizontales y otro para las rutas verticasles.
+n = 30; % Numero de interpolaciones de ruta Horizontal.
+n2 = 15; % Numero de interpolaciones de ruta Vertical
+TC_R = ctraj(TCa,TRa,n); % Ruta Centro Arriba -- Derecha Arriba
+TR_C = ctraj(TRa,TCa,n); % Ruta Derecha Arriba -- Centro Arriba
+TC_L = ctraj(TCa,TLa,n); % Ruta Centro Arriba -- Izquierda Arriba
+TL_C = ctraj(TLa,TCa,n); % Ruta Izquierda Arriba -- Centro Arriba
+TC_a = ctraj(TCb,TCa,n2);  % Ruta Centro Abajo -- Centro Arriba
+TC_b = ctraj(TCa,TCb,n2);  % Ruta Centro Arriba -- Centro Abajo
+TR_a = ctraj(TRb,TRa,n2);  % Ruta Derecha Abajo -- Derecha Arriba
+TR_b = ctraj(TRa,TRb,n2);  % Ruta Derecha Arriba -- Derecha Abajo
+TL_a = ctraj(TLb,TLa,n2);  % Ruta Izquierda Abajo -- Izquierda Arriba
+TL_b = ctraj(TLa,TLb,n2);  % Ruta Izquierda Arriba -- Izquierda Abajo
+```
+### Cálculo de las posiciones del Gripper.
+Para calculas los valores necesarios de cierre y apertura del gripper se fabricaron las piezas a operar primero, considerando que el mecanismo de cierre del gripper no es lineal respecto al ángulo de rotación del motor, debido al mecanismo que usa para la acción, se realizó una medición manual desde la interface de Dynamixel, realizando un experimento de cierre sobre la pieza para garantizar que la apertura es suficiente para contener la pieza sin impactarla y que el cierre es lo suficientemente justo para evitar que la pieza se caiga por gravedad o por los movimientos, pero que el cierre no sea demasiado que se corra el riesgo de dañar el mecanismo de cierre o de saturar la capacidad de torque del motor.
+
+``` matlab
+%% Valores para las posisiones del gripper
+open = 0;
+close = 0.8624;%mapfun(680,0,1023,deg2rad(-150),deg2rad(150))
+```
+
+### Calculo de la cinematica inversa de la ruta completa.
+Teniendo las MTH’s para todas las interpolaciones entre vértices se realiza un proceso para calcular para cada una de esas MTH’s los valores angulares para cada uno de los actuados que nos permiten llegar con el efector final a la posición deseada, para esto se usa la función de cinemática inversa por el método geométrico y de desacople obtenida.
+
+``` matlab
+%% Calculo de la ruta completa, teniendo en cuenta los 
+%% vértices y los puntos de interpolación.
+
+%home
+q_home = [0 0 0 0 open];
+
+%Pos ini - centro arriba
+qC_a = [P1 open];
+
+%Centro a derecha
+for i=1:n
+   qinv = invKinPhantomX(TC_R(:,:,i),'up');
+   qC_R(i,:) = [qinv open];
+end
+
+%Derecha abajo y cerrar
+for i=1:n2
+   qinv = invKinPhantomX(TR_b(:,:,i),'up');
+   qR_b(i,:) = [qinv open];
+end
+qR_b = [qR_b; P3 open; P3 close];
+
+
+%Derecha arriba
+for i=1:n2
+   qinv = invKinPhantomX(TR_a(:,:,i),'up');
+   qR_a(i,:) = [qinv close];
+end
+% qR_a = [P2 close];
+
+%Derecha a Centro
+for i=1:n
+   qinv = invKinPhantomX(TR_C(:,:,i),'up');
+   qR_C(i,:) = [qinv close];
+end
+
+%Centro abajo y abrir
+for i=1:n2
+   qinv = invKinPhantomX(TC_b(:,:,i),'up');
+   qC_b(i,:) = [qinv close];
+end
+qC_b = [qC_b; P6 close; P6 open];
+
+%Centro arriba 2
+for i=1:n2
+   qinv = invKinPhantomX(TC_a(:,:,i),'up');
+   qC_a2(i,:) = [qinv open];
+end
+
+%Centro a izquierda
+for i=1:n
+   qinv = invKinPhantomX(TC_L(:,:,i),'up');
+   qC_L(i,:) = [qinv open];
+end
+
+%Izquierda abajo y cerrar
+for i=1:n2
+   qinv = invKinPhantomX(TL_b(:,:,i),'up');
+   qL_b(i,:) = [qinv open];
+end
+qL_b = [qL_b; P5 open; P5 close];
+
+%Izquierda arriba
+for i=1:n2
+   qinv = invKinPhantomX(TL_a(:,:,i),'up');
+   qL_a(i,:) = [qinv close];
+end
+qL_a = [qL_a; P4 close];
+
+%Izquierda a centro
+for i=1:n
+   qinv = invKinPhantomX(TL_C(:,:,i),'up');
+   qL_C(i,:) = [qinv close];
+end
+
+%Centro abajo y abrir
+
+%Centro arriba 2
+```
+
+### Composición definitiva de la ruta.
+Se realiza el proceso de compilado de todos los pasos de la ruta, se apilan los valores angulares de los motores para cada recorrido, teniendo presente que se deben repetir los pasos de la forma deseada.
+
+``` matlab
+%Matriz total de valores articulares de la ruta completa.
+qTotal = [q_home;
+          qC_a;
+          qC_R;
+          qR_b;
+          qR_a;
+          qR_C;
+          qC_b;
+          qC_a2;
+          qC_L;
+          qL_b;
+          qL_a;
+          qL_C;
+          qC_b;
+          qC_a2];
+```
+
 ## Movement in task space
 
