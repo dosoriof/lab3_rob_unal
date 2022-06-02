@@ -41,6 +41,17 @@ $$ pitch = atan2(R_{p31},R_{p11}) $$
 $$ q_4 = pitch - q_2 - q_3 $$
 
 ### Workspace
+Para determina  el espacio de trabajo del motor se realiza un diagrama geométrico simplificado del mismo con los datos medidos del robot físico, se determina el espacio de trabajo del motor en el plano XZ del origen, considerando que es el plano que más variaciones tiene, especialmente si se considera que el plano XY es un circulo competo debido a la acción rotacional del primer actuador, y el espacio de trabajo en el plano YZ es muy similar al plano de trabajo en el Plano XZ solo que con menos restricciones por interferencia.
+
+Se entiende que esto forma una geometría semiesférica con un vacío interno, definido por la interferencia que realiza el robot consigo mismo.
+De forma detallada se toma el modelo geométrico de cada eslabón, incluyendo la base del robot y se realizan los movimientos angulares máximos posibles para cada rotación, buscando los limites en los cuales el robot comienza a generar interferencia consigo mismo o con la base, o los puntos en los cuales el actuador llega a su máximo.
+
+Como se puede evidenciar en la imagen siguiente se puede ver que de forma simple el espacio de trabajo está compuesto por una geometría esférica  de 250° en la parte superior, en la parte inferior dicha geometría no se conserva debido a la interferencia que tiene el robot consigo mismo y con su base, en el diagrama se asume que el robot es capaz de actuar bajo su propia base, esto significa que no existe ninguna superficie en dicha zona que se lo impida, esto puede cambiar de acuerdo al sistema de montaje que tenga el robot.
+
+En la imagen se puede evidenciar que cuando una articulación llega a su límite ya sea del motor o por interferencia, la siguiente articulación puede continuar en la misma dirección hasta que esta se vea limitada.
+
+Adicionalmente es importante considerar que para el presente ejercicio se toma como eje coordenado inicial el punto colineal con la primera articulación que se encuentra en el nivel más inferior de la base, y se está tomando como eje coordenado del efector final el centro de las mordazas a aproximadamente la mitad de la atura, se toma debido a que es una zona segura operativamente, ya que le permite al objeto que se busca recoger, tener tolerancia en su ubicación sin correr el riesgo de no ser agarrado.
+
 <img src="DynaPhantom-Layout.jpg" alt="Gráfica Espacio de trabajo" width="700">
 
 
