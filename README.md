@@ -2,6 +2,12 @@
 
 **Laboratory 3 · ROS · MATLAB · Python**
 
+## Project demonstration
+
+[![Watch the PhantomX demonstration](https://img.youtube.com/vi/Qm2VoXwQtFI/0.jpg)](https://youtu.be/Qm2VoXwQtFI)
+
+Watch the robot perform pick-and-place and task-space movements.
+
 **Authors**
 
 - Rafael Ricardo Galindo Leon
