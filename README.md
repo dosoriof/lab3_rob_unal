@@ -25,23 +25,26 @@ n_z & o_z & a_z & z_T \newline
 \end{bmatrix}
 $$
 
-$$r = \sqrt{x_T^2 + y_T^2}$$
-
-$$h = z_w - l_1$$
+$$
+r = \sqrt{x_T^2 + y_T^2}
+$$
 
 $$
-PosW =
+h = z_w - l_1
+$$
+
+$$
+\mathrm{PosW} =
 \begin{bmatrix}
-x_w \newline y_w \newline z_w
+x_w \\ y_w \\ z_w
 \end{bmatrix}
 =
 \begin{bmatrix}
-x_T \newline y_T \newline z_T
+x_T \\ y_T \\ z_T
 \end{bmatrix}
--
-l_4
+- l_4
 \begin{bmatrix}
-a_x \newline a_y \newline a_z
+a_x \\ a_y \\ a_z
 \end{bmatrix}
 $$
 
