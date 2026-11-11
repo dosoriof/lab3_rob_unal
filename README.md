@@ -37,8 +37,7 @@ $$
 \mathrm{PosW} =
 \begin{bmatrix}
 x_w \\ y_w \\ z_w
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 x_T \\ y_T \\ z_T
 \end{bmatrix}
@@ -46,7 +45,9 @@ x_T \\ y_T \\ z_T
 \begin{bmatrix}
 a_x \\ a_y \\ a_z
 \end{bmatrix}
+
 $$
+
 
 ### Joint 1
 
